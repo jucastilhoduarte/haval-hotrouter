@@ -130,19 +130,17 @@ asserteq "still 4 after 30 keepalives" "$(total)"  4
 apply_4g
 asserteq "4G purges to zero"           "$(total)"  0
 
-echo "== Scenario 6: update from old release — purge legacy tetherctrl ghosts + dups =="
+echo "== Scenario 6: crash recovery — self + ip rule ghosts, then startup baseline =="
 : > "$STORE"; : > "$IPSTORE"
 apply_starlink 2>/dev/null
-# legacy rules a <= v1.0.6 daemon could have left in the system chains, plus crash dups
-echo "nat|tetherctrl_nat_POSTROUTING|-o wlan0 -j MASQUERADE" >> "$STORE"
-echo "filter|tetherctrl_FORWARD|-i wlan2 -o wlan0 -g tetherctrl_counters" >> "$STORE"
-echo "filter|tetherctrl_counters|-i wlan2 -o wlan0 -j RETURN" >> "$STORE"
+# simulate a SIGKILL'd run that left duplicate self rules + extra diversion ip rules
 echo "$SELF_NAT" >> "$STORE"
+echo "$SELF_FWD1" >> "$STORE"
 echo "rule|from all iif wlan2 lookup wlan0 priority 17999" >> "$IPSTORE"
 echo "rule|from all iif wlan2 lookup wlan0 priority 17999" >> "$IPSTORE"
-[ "$(total)" -gt 4 ] && ok "legacy ghosts present before baseline ($(total))" || bad "ghost setup" "got $(total)"
+[ "$(total)" -gt 4 ] && ok "ghosts present before baseline ($(total))" || bad "ghost setup" "got $(total)"
 apply_4g    # what the startup baseline runs
-asserteq "baseline purges legacy tetherctrl + dups to zero" "$(total)"  0
+asserteq "baseline purges self + ip ghosts to zero" "$(total)"  0
 
 echo "== Scenario 7: do_stop-style purge from a clean starlink state =="
 TC_EXISTS=0

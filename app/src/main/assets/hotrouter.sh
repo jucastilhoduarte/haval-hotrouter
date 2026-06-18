@@ -11,10 +11,9 @@
 # Design notes (see docs/DESIGN.md):
 # - The Starlink path is fully self-managed: ip_forward + one `ip rule` diversion + our own
 #   FORWARD/MASQUERADE rules. It does NOT touch the system tetherctrl_* chains at all.
-#   Earlier versions rode on tetherctrl_*, which Android only populates while a cellular
-#   upstream is alive — so Starlink silently broke whenever 4G dropped to zero. The 4G
-#   fallback still uses the system's own tetherctrl NAT (always present when cellular is up);
-#   we just stopped depending on it for the Starlink path.
+#   (The original multimidia app rode on tetherctrl_*, which Android only populates while a
+#   cellular upstream is alive — so Starlink broke whenever 4G dropped to zero.) The 4G
+#   fallback still uses the system's own tetherctrl NAT, present whenever cellular is up.
 # - Switching is debounced (hysteresis) and routing is only re-applied on an actual
 #   transition, so brief Starlink ping blips no longer flap the route and reset live
 #   connections (which used to kill CarPlay mid-drive).
@@ -130,33 +129,6 @@ teardown_iptables_self() {
   done
 }
 
-# ---- legacy cleanup: tetherctrl additions left by older releases ----
-#
-# The Starlink path no longer writes into the system tetherctrl_* chains. But a daemon from
-# an older release (<= v1.0.6) may have, and a SIGKILL'd one could not tear them down. This
-# teardown stays in purge_footprint so an update wipes any such legacy rule from a system
-# chain on the next launch. It writes nothing — only removes our old signature if present.
-teardown_iptables_tetherctrl() {
-  while iptables -t nat -C tetherctrl_nat_POSTROUTING -o "$STARLINK_IF" -j MASQUERADE 2>/dev/null; do
-    iptables -t nat -D tetherctrl_nat_POSTROUTING -o "$STARLINK_IF" -j MASQUERADE 2>/dev/null || break
-  done
-  while iptables -C tetherctrl_FORWARD -i "$STARLINK_IF" -o "$HOTSPOT_IF" -m state --state RELATED,ESTABLISHED -g tetherctrl_counters 2>/dev/null; do
-    iptables -D tetherctrl_FORWARD -i "$STARLINK_IF" -o "$HOTSPOT_IF" -m state --state RELATED,ESTABLISHED -g tetherctrl_counters 2>/dev/null || break
-  done
-  while iptables -C tetherctrl_FORWARD -i "$HOTSPOT_IF" -o "$STARLINK_IF" -m state --state INVALID -j DROP 2>/dev/null; do
-    iptables -D tetherctrl_FORWARD -i "$HOTSPOT_IF" -o "$STARLINK_IF" -m state --state INVALID -j DROP 2>/dev/null || break
-  done
-  while iptables -C tetherctrl_FORWARD -i "$HOTSPOT_IF" -o "$STARLINK_IF" -g tetherctrl_counters 2>/dev/null; do
-    iptables -D tetherctrl_FORWARD -i "$HOTSPOT_IF" -o "$STARLINK_IF" -g tetherctrl_counters 2>/dev/null || break
-  done
-  while iptables -C tetherctrl_counters -i "$HOTSPOT_IF" -o "$STARLINK_IF" -j RETURN 2>/dev/null; do
-    iptables -D tetherctrl_counters -i "$HOTSPOT_IF" -o "$STARLINK_IF" -j RETURN 2>/dev/null || break
-  done
-  while iptables -C tetherctrl_counters -i "$STARLINK_IF" -o "$HOTSPOT_IF" -j RETURN 2>/dev/null; do
-    iptables -D tetherctrl_counters -i "$STARLINK_IF" -o "$HOTSPOT_IF" -j RETURN 2>/dev/null || break
-  done
-}
-
 # ---- Starlink reachability probe ----
 
 starlink_has_ping() {
@@ -187,16 +159,15 @@ keepalive_starlink() {
   ensure_iptables_self
 }
 
-# Remove every rule this daemon could ever have added — the diversion ip rule, the
-# self-managed NAT/forward, and any legacy tetherctrl additions from older releases. Each
-# teardown is a `while -C ... ; do -D` loop, so duplicates from a previously crashed run
-# are all removed, not just one. This is the single source of truth for "our footprint",
+# Remove every rule this daemon adds — the diversion ip rule and the self-managed
+# NAT/forward. Each teardown is a `while -C ... ; do -D` loop, so any duplicate left by a
+# crashed run is fully removed, not just one. Single source of truth for "our footprint",
 # used by the 4G path, stop, the signal trap, and the startup baseline — so no exit path
-# can leave a ghost rule behind that would black-hole hotspot traffic.
+# can leave a ghost rule behind that would black-hole hotspot traffic. (The dangerous one
+# is the ip rule diversion; if it's gone, leftover ACCEPT/MASQUERADE rules route nothing.)
 purge_footprint() {
   cleanup_duplicate_rules
   teardown_iptables_self
-  teardown_iptables_tetherctrl
 }
 
 apply_4g() {

@@ -152,8 +152,7 @@ Fixes in `hotrouter.sh`:
    Starlink path **does not touch the system `tetherctrl_*` chains at all** — the whole
    router is `ip_forward` + one `ip rule` diversion + these three iptables rules. The 4G
    fallback still rides on the system's own tetherctrl NAT (always present when cellular is
-   up); `purge_footprint` also strips any legacy tetherctrl rule left by an older release
-   (≤ v1.0.6).
+   up).
 2. **Hysteresis**: switch to Starlink only after `UP_THRESHOLD` (2) consecutive good
    samples, fall back only after `DOWN_THRESHOLD` (4) consecutive failures. Routing is
    re-applied (and the cache flushed) **only on a real transition**; steady state just
@@ -169,8 +168,8 @@ Guarantees:
 
 - **Idempotent adds** — every `ensure_*` is `-C` guarded, so nothing accumulates across
   the 5s loop or repeated transitions.
-- **One purge, every exit path** — `purge_footprint` (diversion rule + self NAT/forward +
-  tetherctrl additions) runs on 4G fallback, `stop`, the TERM/INT trap, **and** the
+- **One purge, every exit path** — `purge_footprint` (diversion `ip rule` + self
+  NAT/forward) runs on 4G fallback, `stop`, the TERM/INT trap, **and** the
   startup baseline. So even after an untrappable SIGKILL, the next launch resets to a
   clean slate before doing anything. In-kernel rules also vanish on reboot.
 - **Proven, not asserted** — `scripts/test/rule_lifecycle_test.sh` drives the real
