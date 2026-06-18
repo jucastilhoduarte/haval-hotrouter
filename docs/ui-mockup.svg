@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 360" width="840" height="360">
+  <defs>
+    <linearGradient id="btnGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#16a34a"/>
+    </linearGradient>
+    <radialGradient id="bgGlow" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.08"/>
+      <stop offset="100%" style="stop-color:#0d0d1a;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="btnShadow">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#22c55e" flood-opacity="0.35"/>
+    </filter>
+    <filter id="dotGlow">
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#22c55e" flood-opacity="0.9"/>
+    </filter>
+  </defs>
+
+  <!-- Screen background -->
+  <rect width="840" height="360" rx="8" fill="#0d0d1a"/>
+  <rect width="840" height="360" rx="8" fill="url(#bgGlow)"/>
+  <rect width="840" height="360" rx="8" fill="none" stroke="#2d2d3d" stroke-width="2"/>
+
+  <!-- Wi-Fi icon -->
+  <!-- dot -->
+  <circle cx="420" cy="102" r="3.5" fill="#6366f1"/>
+  <!-- arc 1 -->
+  <path d="M409 94 Q420 86 431 94" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <!-- arc 2 -->
+  <path d="M400 86 Q420 73 440 86" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <!-- arc 3 -->
+  <path d="M391 78 Q420 60 449 78" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.35"/>
+
+  <!-- App title -->
+  <text x="420" y="122" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#a0aec0" letter-spacing="3">HOTROUTER</text>
+
+  <!-- Toggle button -->
+  <rect x="290" y="140" width="260" height="72" rx="14" fill="url(#btnGrad)" filter="url(#btnShadow)"/>
+  <text x="420" y="170" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="800" fill="#ffffff" letter-spacing="4">LIGADO</text>
+  <text x="420" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="rgba(255,255,255,0.6)" letter-spacing="1">toque para desligar</text>
+
+  <!-- Route chip -->
+  <rect x="305" y="228" width="230" height="28" rx="14" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.28)" stroke-width="1"/>
+  <circle cx="328" cy="242" r="5" fill="#22c55e" filter="url(#dotGlow)"/>
+  <text x="340" y="246" font-family="system-ui,sans-serif" font-size="12" font-weight="500" fill="#86efac" letter-spacing="0.5">Trafegando via Starlink</text>
+
+  <!-- Logs button -->
+  <rect x="360" y="272" width="120" height="30" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <text x="420" y="291" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#94a3b8" letter-spacing="1.5">VER LOGS</text>
+
+  <!-- Ratio label -->
+  <text x="828" y="352" text-anchor="end" font-family="system-ui,sans-serif" font-size="9" fill="#2a2a3a" letter-spacing="1">21:9 · HotRouter v1</text>
+</svg>
