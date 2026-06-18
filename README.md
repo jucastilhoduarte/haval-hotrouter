@@ -45,9 +45,10 @@ Signing secrets live in repo Actions secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD
 
 ## Install on the car
 
+Via telnet (`telnet 192.168.x.x 23`) ou direto no shell da multimídia, de qualquer pasta:
+
 ```sh
-# on the head unit shell, with the Frida exploit binaries reachable
-sh install.sh            # pulls the latest release APK
-# or
-sh install.sh <apk-url>  # specific APK / CI artifact
+curl -fsSL https://raw.githubusercontent.com/jucastilhoduarte/haval-hotrouter/main/scripts/install.sh | sh
 ```
+
+Isso baixa e executa o install.sh, que já puxa os binários do Frida e o APK do último release automaticamente.
