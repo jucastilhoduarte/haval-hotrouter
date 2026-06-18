@@ -10,15 +10,13 @@
 #
 # GH_TOKEN (opcional, via env): vai como Bearer no download (so para URL privada/artifact).
 #
-# Por que o exploit Frida ainda e necessario: o app so consegue falar com o shell root
+# Por que o exploit Frida e necessario: o app so consegue falar com o shell root
 # em telnet 127.0.0.1:23 se for instalado com uid <= 10999. Esse uid e herdado quando o
-# app e instalado DURANTE a janela de injecao no system_server (fases 1-3). O HotRouter
-# nao usa mais Shizuku - so o telnet root - entao a fase do Shizuku foi removida.
+# app e instalado DURANTE a janela de injecao no system_server (fases 1-3).
 
 set -u
 
 PKG="com.castilhoduarte.hotrouter"
-PKG_OLD="br.com.redesurftank.havalshisuku"
 REPO="https://github.com/jucastilhoduarte/haval-hotrouter"
 WORK="/data/local/tmp"
 ROLLBACK_ENABLED=true
@@ -124,19 +122,10 @@ main() {
     fi
     [ -s "$APK" ] || die "APK final vazio"
 
-    # --- Fase 5: remover o app antigo de multimidia (se existir) ---
-    log "INFO" "Fase 5: Remover app antigo"
-    if app_installed "$PKG_OLD"; then
-        log "INFO" "Desinstalando $PKG_OLD"
-        pm uninstall "$PKG_OLD" >/dev/null 2>&1 || log "WARN" "uninstall do antigo falhou (seguindo)"
-    else
-        log "INFO" "App antigo nao instalado"
-    fi
-
-    # --- Fase 6: instalar HotRouter ---
+    # --- Fase 5: instalar HotRouter ---
     # uninstall do proprio obrigatorio antes de reinstalar: assinatura propria difere de
     # uma versao anterior, entao pm install -r por cima falharia (UPDATE_INCOMPATIBLE).
-    log "INFO" "Fase 6: Instalar $PKG"
+    log "INFO" "Fase 5: Instalar $PKG"
     if app_installed "$PKG"; then
         log "INFO" "Desinstalando versao atual do HotRouter"
         pm uninstall "$PKG" >/dev/null 2>&1 || log "WARN" "uninstall falhou (seguindo)"
