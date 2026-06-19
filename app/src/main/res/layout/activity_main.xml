@@ -8,8 +8,8 @@
 
     <!-- Header: somente o logo, centralizado -->
     <ImageView
-        android:layout_width="128dp"
-        android:layout_height="128dp"
+        android:layout_width="192dp"
+        android:layout_height="192dp"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/ic_wifi"
         android:contentDescription="@string/app_name" />
@@ -19,7 +19,7 @@
         android:id="@+id/big_button"
         android:layout_width="600dp"
         android:layout_height="190dp"
-        android:layout_marginTop="104dp"
+        android:layout_marginTop="52dp"
         android:orientation="vertical"
         android:gravity="center"
         android:background="@drawable/bg_button"
@@ -65,7 +65,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="52dp"
         android:orientation="horizontal"
         android:gravity="center">
 
