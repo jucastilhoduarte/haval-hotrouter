@@ -21,8 +21,8 @@
   <rect width="840" height="360" rx="8" fill="url(#bgGlow)"/>
   <rect width="840" height="360" rx="8" fill="none" stroke="#2d2d3d" stroke-width="2"/>
 
-  <!-- Logo: estrela irradiando arcos Wi-Fi (somente o logo, +50%, centralizado) -->
-  <g transform="translate(420,63) scale(2.25) translate(-420,-87)">
+  <!-- Logo: estrela irradiando arcos Wi-Fi (somente o logo, centralizado) -->
+  <g transform="translate(420,88.25) scale(2.25) translate(-420,-87)">
     <!-- estrela 5 pontas centrada em 420,106 -->
     <path d="M420,99 L421.9,103.8 L427,104.2 L423.3,107.5 L424.5,112.5 L420,109.8 L415.5,112.5 L416.7,107.5 L413,104.2 L418.1,103.8 Z" fill="#F59E0B"/>
     <!-- arc 1 -->
@@ -33,30 +33,27 @@
     <path d="M391 81 Q420 62 449 81" stroke="#6366f1" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.35"/>
   </g>
 
-  <!-- Toggle button (largo e baixo, retangular) — gap igual ~15 entre todos -->
-  <rect x="150" y="134" width="540" height="80" rx="18" fill="url(#btnGrad)" filter="url(#btnShadow)"/>
-  <text x="420" y="182" text-anchor="middle" font-family="system-ui,sans-serif" font-size="40" font-weight="800" fill="#ffffff" letter-spacing="6">LIGADO</text>
-  <text x="420" y="203" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="rgba(255,255,255,0.6)" letter-spacing="1">toque para desligar</text>
+  <!-- Toggle button (largo e baixo, retangular) -->
+  <rect x="150" y="174" width="540" height="80" rx="18" fill="url(#btnGrad)" filter="url(#btnShadow)"/>
+  <text x="420" y="222" text-anchor="middle" font-family="system-ui,sans-serif" font-size="40" font-weight="800" fill="#ffffff" letter-spacing="6">LIGADO</text>
+  <text x="420" y="243" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="rgba(255,255,255,0.6)" letter-spacing="1">toque para desligar</text>
 
-  <!-- Route chip -->
-  <rect x="290" y="229" width="260" height="38" rx="19" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.28)" stroke-width="1.5"/>
-  <circle cx="318" cy="248" r="7" fill="#22c55e" filter="url(#dotGlow)"/>
-  <text x="334" y="254" font-family="system-ui,sans-serif" font-size="18" font-weight="500" fill="#86efac" letter-spacing="0.5">Trafegando via Starlink</text>
+  <!-- Linha inferior: mesma largura do botão (150..690). Status à esquerda, ícones à direita. -->
+  <!-- Route chip (esquerda) -->
+  <rect x="150" y="287" width="250" height="38" rx="19" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.28)" stroke-width="1.5"/>
+  <circle cx="178" cy="306" r="7" fill="#22c55e" filter="url(#dotGlow)"/>
+  <text x="194" y="312" font-family="system-ui,sans-serif" font-size="18" font-weight="500" fill="#86efac" letter-spacing="0.5">Trafegando via Starlink</text>
 
-  <!-- Botão Logs (ícone à esquerda, texto à direita) -->
-  <rect x="255" y="282" width="120" height="48" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
-  <!-- ícone lista -->
-  <line x1="278" y1="300" x2="298" y2="300" stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round"/>
-  <line x1="278" y1="306" x2="295" y2="306" stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round"/>
-  <line x1="278" y1="312" x2="292" y2="312" stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round"/>
-  <text x="308" y="313" font-family="system-ui,sans-serif" font-size="18" fill="#94a3b8" letter-spacing="0.5">Logs</text>
-
-  <!-- Botão Configurações (ícone à esquerda, texto à direita) -->
-  <rect x="395" y="282" width="190" height="48" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
-  <!-- ícone engrenagem simples -->
-  <circle cx="420" cy="306" r="8" fill="none" stroke="#94a3b8" stroke-width="2.4"/>
-  <circle cx="420" cy="306" r="3" fill="#94a3b8"/>
-  <text x="438" y="313" font-family="system-ui,sans-serif" font-size="18" fill="#94a3b8" letter-spacing="0.5">Configurações</text>
+  <!-- Botões de ação somente ícones (direita, colados em x=690) -->
+  <!-- Logs -->
+  <circle cx="608" cy="306" r="22" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+  <line x1="598" y1="300" x2="618" y2="300" stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="598" y1="306" x2="615" y2="306" stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="598" y1="312" x2="612" y2="312" stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- Configurações -->
+  <circle cx="668" cy="306" r="22" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+  <circle cx="668" cy="306" r="8" fill="none" stroke="#94a3b8" stroke-width="2.4"/>
+  <circle cx="668" cy="306" r="3" fill="#94a3b8"/>
 
   <!-- Ratio label -->
   <text x="828" y="352" text-anchor="end" font-family="system-ui,sans-serif" font-size="9" fill="#2a2a3a" letter-spacing="1">21:9 · Starlink Router v1</text>

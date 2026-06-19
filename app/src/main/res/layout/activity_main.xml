@@ -46,65 +46,58 @@
             android:textSize="28sp" />
     </LinearLayout>
 
-    <!-- Route chip -->
-    <TextView
-        android:id="@+id/route_chip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="52dp"
-        android:background="@drawable/bg_chip"
-        android:paddingStart="36dp"
-        android:paddingEnd="36dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
-        android:text="@string/route_none"
-        android:textColor="@color/text_primary"
-        android:textSize="30sp" />
-
-    <!-- Botões de ação -->
+    <!-- Linha inferior: mesma largura do botão. Status à esquerda, ícones à direita. -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="600dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="52dp"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center_vertical">
 
+        <!-- Route chip (cresce/encolhe à vontade) -->
         <TextView
+            android:id="@+id/route_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_chip"
+            android:paddingStart="36dp"
+            android:paddingEnd="36dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:text="@string/route_none"
+            android:textColor="@color/text_primary"
+            android:textSize="30sp" />
+
+        <!-- Empurra os ícones para a direita -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- Botões de ação (somente ícones), colados na direita -->
+        <ImageView
             android:id="@+id/logs_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:background="@drawable/bg_logs_button"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
-            android:gravity="center_vertical"
-            android:drawableStart="@drawable/ic_logs"
-            android:drawablePadding="16dp"
-            android:text="@string/logs"
-            android:textColor="@color/text_secondary"
-            android:textSize="26sp"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_logs"
+            android:contentDescription="@string/logs"
             android:clickable="true"
             android:focusable="true" />
 
-        <TextView
+        <ImageView
             android:id="@+id/settings_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="16dp"
             android:background="@drawable/bg_logs_button"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
-            android:gravity="center_vertical"
-            android:drawableStart="@drawable/ic_settings"
-            android:drawablePadding="16dp"
-            android:text="@string/settings"
-            android:textColor="@color/text_secondary"
-            android:textSize="26sp"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_settings"
+            android:contentDescription="@string/settings"
             android:clickable="true"
             android:focusable="true" />
-
     </LinearLayout>
 </LinearLayout>
