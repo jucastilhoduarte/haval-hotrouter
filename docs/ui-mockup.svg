@@ -44,9 +44,20 @@
   <circle cx="328" cy="242" r="5" fill="#22c55e" filter="url(#dotGlow)"/>
   <text x="340" y="246" font-family="system-ui,sans-serif" font-size="12" font-weight="500" fill="#86efac" letter-spacing="0.5">Trafegando via Starlink</text>
 
-  <!-- Logs button -->
-  <rect x="360" y="272" width="120" height="30" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-  <text x="420" y="291" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#94a3b8" letter-spacing="1.5">VER LOGS</text>
+  <!-- Botão Logs -->
+  <rect x="322" y="268" width="90" height="46" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <!-- ícone lista -->
+  <line x1="351" y1="280" x2="393" y2="280" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="351" y1="284" x2="389" y2="284" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="351" y1="288" x2="385" y2="288" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="367" y="306" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#94a3b8" letter-spacing="0.5">Logs</text>
+
+  <!-- Botão Configurações -->
+  <rect x="428" y="268" width="90" height="46" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <!-- ícone engrenagem simples -->
+  <circle cx="473" cy="284" r="5" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+  <circle cx="473" cy="284" r="2" fill="#94a3b8"/>
+  <text x="473" y="306" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#94a3b8" letter-spacing="0.5">Configurações</text>
 
   <!-- Ratio label -->
   <text x="828" y="352" text-anchor="end" font-family="system-ui,sans-serif" font-size="9" fill="#2a2a3a" letter-spacing="1">21:9 · StarHouter v1</text>
