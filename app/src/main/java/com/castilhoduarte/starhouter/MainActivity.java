@@ -3,7 +3,6 @@ package com.castilhoduarte.starhouter;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -45,11 +44,8 @@ public final class MainActivity extends Activity {
         bigButton.setOnClickListener(v -> toggle());
         findViewById(R.id.logs_button).setOnClickListener(
                 v -> startActivity(new Intent(this, LogActivity.class)));
-        findViewById(R.id.settings_button).setOnClickListener(v -> {
-            Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            i.setData(Uri.fromParts("package", getPackageName(), null));
-            startActivity(i);
-        });
+        findViewById(R.id.settings_button).setOnClickListener(
+                v -> startActivity(new Intent(Settings.ACTION_SETTINGS)));
 
         // Garante que o serviço em segundo plano (watchdog) está ativo mesmo que o daemon tenha
         // sido iniciado apenas pela interface nesta sessão.
