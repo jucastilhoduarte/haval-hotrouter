@@ -48,7 +48,7 @@ public class TelnetRootTest {
         check("incomplete -> null", r5 == null);
 
         // 6. Sequências de escape ANSI removidas da saída.
-        TelnetRoot.Result r6 = run("__HR_BEG__\r\n[1;32mgreen[0m\r\n__HR_END__0\r\n");
+        TelnetRoot.Result r6 = run("__HR_BEG__\r\n[1;32mgreen[0m\r\n__HR_END__0\r\n");
         check("ansi stripped", r6 != null && r6.output.equals("green"));
 
         // 7. Negociação IAC: servidor envia WILL ECHO (251 1) + DO SGA (253 3), depois dados.
