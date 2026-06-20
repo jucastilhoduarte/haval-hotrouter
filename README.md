@@ -6,12 +6,17 @@ Não está em nenhuma loja. Instalado apenas no meu carro.
 
 ## Como instalar
 
-```sh
-# Instalar o JLH6
-sh scripts/install-app.sh
+Via telnet na head unit (`telnet <ip-da-multimidia> 23`):
 
-# Instalar qualquer APK (bypass multimedia restrictions via Frida)
-sh scripts/install-apk.sh <url-do-apk>
+```sh
+# Instalar o JLH6 (baixa o último release automaticamente)
+curl -fsSL https://raw.githubusercontent.com/jucastilhoduarte/jlh6/main/scripts/install-app.sh | sh
+
+# Instalar o JLH6 a partir de uma URL específica
+curl -fsSL https://raw.githubusercontent.com/jucastilhoduarte/jlh6/main/scripts/install-app.sh | sh -s <url-do-apk>
+
+# Instalar qualquer APK
+curl -fsSL https://raw.githubusercontent.com/jucastilhoduarte/jlh6/main/scripts/install-apk.sh | sh -s <url-do-apk>
 ```
 
 Os scripts fazem o bypass do bloqueio de `pm install` via injeção Frida no `system_server`.
