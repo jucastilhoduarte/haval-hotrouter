@@ -8,10 +8,10 @@ Não está em nenhuma loja. Instalado apenas no meu carro.
 
 ```sh
 # Instalar o JLH6
-sh install-app.sh
+sh scripts/install-app.sh
 
 # Instalar qualquer APK (bypass multimedia restrictions via Frida)
-sh install-apk.sh <url-do-apk>
+sh scripts/install-apk.sh <url-do-apk>
 ```
 
 Os scripts fazem o bypass do bloqueio de `pm install` via injeção Frida no `system_server`.

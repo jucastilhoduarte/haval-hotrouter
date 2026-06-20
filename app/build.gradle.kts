@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId = "com.castilhoduarte.jlh6"
         minSdk = 28
-        //noinspection ExpiredTargetSdkVersion  // target 28 on purpose: legacy boot/FGS leniency
+        //noinspection ExpiredTargetSdkVersion  // target 28 on purpose: head-unit compat
         targetSdk = 28
         versionCode = 1
         versionName = "1.0.0"
