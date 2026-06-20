@@ -109,4 +109,4 @@ main() {
     echo "JLH6 instalado com sucesso."
 }
 
-main "$@"
+main
