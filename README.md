@@ -21,6 +21,8 @@ Estados do botão:
 
 O roteamento só é aplicado após o primeiro `ping -I wlan0 8.8.8.8` bem-sucedido (loop de 5s). Se após 10 minutos nenhum ping funcionar, volta para DESATIVADO automaticamente.
 
+As rotinas de aplicar/remover regras são idempotentes e auto-verificadas (com retry): só marca ATIVADO depois de confirmar que as regras foram aplicadas, e a desativação sempre retorna ao estado limpo — mesmo que `wlan0`/`wlan2` sumam no meio do caminho.
+
 Estado persistido em SharedPreferences (`router/enabled`). Na inicialização do sistema (`BOOT_COMPLETED`), se estava ativo, reinicia o loop de ping.
 
 ### Recuperação automática (switch)

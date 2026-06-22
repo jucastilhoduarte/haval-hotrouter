@@ -50,8 +50,9 @@ Aplicativo Android para a head unit pessoal de um carro Haval/GWM. Uma tela:
 ## State machine do RouterManager
 
 ```
-DISABLED → [tap] → STARTING → [ping wlan0 OK] → ACTIVE
-STARTING → [10min sem ping] → DISABLED (salva enabled=false, auto_recovery=false)
+DISABLED → [tap] → STARTING → [ping wlan0 OK + apply verificado] → ACTIVE
+STARTING → [ping OK mas apply não verifica] → STARTING (reagenda doPing, até timeout)
+STARTING → [10min sem ping/apply] → DISABLED (salva enabled=false, auto_recovery=false)
 STARTING → [tap] → PURGING → DISABLED
 ACTIVE   → [tap] → PURGING → DISABLED
 ACTIVE   → [recuperação auto: 3 pings falham] → STARTING (purge → espera 5s → reativa)
@@ -62,6 +63,7 @@ ACTIVE   → [recuperação auto: 3 pings falham] → STARTING (purge → espera
 - Estado persistido: `SharedPreferences("router", "enabled")` e `SharedPreferences("router", "auto_recovery")`
 - No boot: se `enabled=true`, sempre entra STARTING (nunca aplica regras sem ping); o monitor rearma sozinho ao chegar em ACTIVE se `auto_recovery=true`
 - Tap durante PURGING: ignorado
+- **apply/purge idempotentes e auto-verificados**: cada comando termina com uma cláusula de verificação (o `$?` final = estado confirmado) e roda via `execVerified` (retry com backoff, captura `Throwable`). `ACTIVE` só é marcado após apply **verificado** — nunca em apply parcial. `disable`/`recover` repetem o purge até verificar limpo. Verificação é por nome de regra → correta mesmo se `wlan0`/`wlan2` sumirem. Constantes: `APPLY_ATTEMPTS=3`, `PURGE_ATTEMPTS=4`, `VERIFY_BACKOFF_MS=500`.
 
 ## Recuperação automática (auto-recovery)
 
@@ -90,22 +92,27 @@ Sem foreground service, sem notificação permanente. O loop de ping roda no pro
 
 ## Comandos telnet executados
 
-### Apply (ativar roteamento)
+### Apply (ativar roteamento — idempotente + auto-verificado)
 ```sh
 echo 1 > /proc/sys/net/ipv4/ip_forward
-ip rule del from all iif wlan2 lookup wlan0 priority 17999 2>/dev/null; true
+# ip rule idempotente: remove todas as nossas regras, depois adiciona uma
+while ip rule | grep -q 'iif wlan2 lookup wlan0'; do ip rule del from all iif wlan2 lookup wlan0 priority 17999 2>/dev/null || break; done
 ip rule add from all iif wlan2 lookup wlan0 priority 17999
 iptables -t nat -C POSTROUTING -o wlan0 -j MASQUERADE 2>/dev/null || iptables -t nat -I POSTROUTING 1 -o wlan0 -j MASQUERADE
 iptables -C FORWARD -i wlan2 -o wlan0 -j ACCEPT 2>/dev/null || iptables -I FORWARD 1 -i wlan2 -o wlan0 -j ACCEPT
 iptables -C FORWARD -i wlan0 -o wlan2 -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || iptables -I FORWARD 1 -i wlan0 -o wlan2 -m state --state RELATED,ESTABLISHED -j ACCEPT
+# verificação (comando final → $?): forwarding on E as 4 regras presentes
+grep -qx 1 /proc/sys/net/ipv4/ip_forward 2>/dev/null && ip rule | grep -q 'iif wlan2 lookup wlan0' && iptables -t nat -C POSTROUTING -o wlan0 -j MASQUERADE 2>/dev/null && iptables -C FORWARD -i wlan2 -o wlan0 -j ACCEPT 2>/dev/null && iptables -C FORWARD -i wlan0 -o wlan2 -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null
 ```
 
-### Purge (desativar — loop até limpo)
+### Purge (desativar — loop até limpo + auto-verificado)
 ```sh
 while ip rule | grep -q "iif wlan2 lookup wlan0"; do ip rule del ...; done
 while iptables -t nat -C POSTROUTING ...; do iptables -t nat -D POSTROUTING ...; done
 while iptables -C FORWARD -i wlan2 ...; do iptables -D FORWARD ...; done
 while iptables -C FORWARD -i wlan0 ...; do iptables -D FORWARD ...; done
+# verificação (comando final → $?): NENHUMA das nossas regras presente
+! ip rule | grep -q 'iif wlan2 lookup wlan0' && ! iptables -t nat -C POSTROUTING -o wlan0 -j MASQUERADE 2>/dev/null && ! iptables -C FORWARD -i wlan2 -o wlan0 -j ACCEPT 2>/dev/null && ! iptables -C FORWARD -i wlan0 -o wlan2 -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null
 ```
 
 ## Exploit Frida (por que existe)
