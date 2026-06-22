@@ -83,6 +83,16 @@ public class KernelShellTest {
         check("apply-fault: ipForward stuck 0", !k6.ipForward());
         check("apply-fault: rules still added", k6.ipRuleCount() == 1 && k6.natCount() == 1 && k6.forwardCount() == 2);
 
+        KernelShell k7 = new KernelShell();
+        k7.setFailIpForwardWrite(true);
+        Shell.ShellResult echoResult = k7.exec("echo 1 > /proc/sys/net/ipv4/ip_forward");
+        check("echo-fault: non-zero exit", echoResult.exitCode != 0);
+        check("echo-fault: ipForward stays false", !k7.ipForward());
+
+        KernelShell k8 = new KernelShell();
+        Shell.ShellResult delResult = k8.exec("ip rule del from all iif wlan2 lookup wlan0 priority 17999");
+        check("iprule-del: absent rule non-zero", delResult.exitCode != 0);
+
         System.out.println("\n" + passed + " passed, " + failed + " failed");
         if (failed > 0) System.exit(1);
     }

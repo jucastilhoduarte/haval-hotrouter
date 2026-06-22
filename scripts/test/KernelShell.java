@@ -170,7 +170,10 @@ public final class KernelShell implements Shell {
         if (gt < 0) return 0;
         String value = cmd.substring("echo".length(), gt).trim();
         String path = cmd.substring(gt + 1).trim();
-        if (path.equals(IP_FWD) && !failIpForwardWrite) ipForward = value.equals("1");
+        if (path.equals(IP_FWD)) {
+            if (failIpForwardWrite) return 1;
+            ipForward = value.equals("1");
+        }
         return 0;
     }
 
