@@ -38,6 +38,20 @@ Aplicativo Android para a head unit pessoal de um carro Haval/GWM. Uma tela:
 | `scripts/install-apk.sh` | Instala qualquer APK via exploit Frida. |
 | `scripts/test/TelnetRootTest.java` | 15 testes do TelnetRoot. JDK puro, sem Gradle. |
 
+## Testes & TDD (obrigatório)
+
+Suite de testes em `scripts/test/` roda em JDK puro (sem Gradle, sem libs). Rode tudo com:
+
+```sh
+bash scripts/run.sh
+```
+
+- `RouterCore` (lógica pura, sem `android.*`) é o coração testável. `RouterManager` é só o adapter Android (liga `Clock`/`Scheduler`/`Shell`/`StateStore` reais).
+- `KernelShell` (em `scripts/test/`) **interpreta os comandos reais** (`applyCmd`/`purgeCmd`/ping) contra um kernel simulado; `VirtualScheduler` dá tempo virtual determinístico.
+- **Toda edição em `RouterCore` ou na lógica de rede segue TDD:** escreva o teste vermelho primeiro em `RouterCoreTest.java`, veja falhar, implemente o mínimo, rode `scripts/run.sh` até verde, só então commit.
+- **Invariantes que nunca podem regredir:** INV1 — nunca rotear pra Starlink sem ping OK (nunca `ACTIVE` sem apply verificado); INV2 — fora de `ACTIVE`, zero regras JLH6 (sem fantasmas que travem o hotspot `wlan2` normal).
+- CI roda `scripts/run.sh` em todo PR. Não faça merge com teste vermelho.
+
 ## Topologia de rede
 
 | Interface | Papel |

@@ -26,6 +26,9 @@ jobs:
       - name: Conceder permissão de execução ao gradlew
         run: chmod +x gradlew
 
+      - name: Testes (JDK puro)
+        run: bash scripts/run.sh
+
       - name: Compilar (debug)
         run: ./gradlew assembleDebug --stacktrace
 
