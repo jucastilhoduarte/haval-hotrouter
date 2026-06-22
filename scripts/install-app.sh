@@ -48,8 +48,6 @@ download_cached() {
     download "$1" "$2" "$3"
 }
 
-app_installed() { pm path "$1" >/dev/null 2>&1; }
-
 main() {
     cd "$WORK" || die "Falha ao acessar $WORK"
 
@@ -91,15 +89,15 @@ main() {
     download "$URL" "jlh6_new.apk" "JLH6 APK"
     APK="$WORK/jlh6_new.apk"
 
-    # --- Fase 5: instalar JLH6 ---
-    # uninstall do proprio obrigatorio antes de reinstalar: assinatura propria difere de
-    # uma versao anterior, entao pm install -r por cima falharia (UPDATE_INCOMPATIBLE).
-    log "INFO" "Fase 5: Instalar $PKG"
-    if app_installed "$PKG"; then
-        log "INFO" "Desinstalando versao atual do JLH6"
-        pm uninstall "$PKG" >/dev/null 2>&1 || log "WARN" "uninstall falhou (seguindo)"
-    fi
-    pm install "$APK" || die "Falha na instalacao do JLH6"
+    # --- Fase 5: instalar JLH6 (in-place, preserva acessibilidade) ---
+    # pm install -r atualiza por cima mantendo dados e os secure settings de
+    # acessibilidade (enabled_accessibility_services). NAO desinstalar: o uninstall
+    # purga o componente da lista de a11y -> perde o autostart e exige reativar na mao.
+    # Requer assinatura igual entre versoes (releases assinados com a chave do dono).
+    # -d permite reinstalar mesmo com versionCode igual ou menor.
+    log "INFO" "Fase 5: Instalar $PKG (in-place)"
+    pm install -r -d "$APK" \
+        || die "Falha na instalacao do JLH6 (UPDATE_INCOMPATIBLE => build atual tem outra assinatura; nesse caso o uninstall manual seria necessario e a acessibilidade teria de ser reativada)"
 
     # --- limpeza ---
     rm -f jlh6_new.apk 2>/dev/null || true
