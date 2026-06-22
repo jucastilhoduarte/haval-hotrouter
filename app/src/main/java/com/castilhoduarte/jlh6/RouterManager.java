@@ -17,6 +17,9 @@ public final class RouterManager {
     private static final long PING_TIMEOUT_MS  = 10 * 60 * 1_000L;
     private static final int CONNECT_MS = 2_000;
     private static final int READ_MS = 6_000;
+    private static final int APPLY_ATTEMPTS = 3;
+    private static final int PURGE_ATTEMPTS = 4;
+    private static final long VERIFY_BACKOFF_MS = 500L;
 
     private static final String HOTSPOT_IF = "wlan2";
     private static final String STARLINK_IF = "wlan0";
@@ -123,7 +126,13 @@ public final class RouterManager {
         if (!pingRunning) return;
 
         if (ok) {
-            execApply();
+            if (!execApply()) {
+                // Apply could not be verified — do not claim ACTIVE.
+                // Retry the ping/apply cycle (bounded by the 10-min timeout above).
+                if (!pingRunning) return;
+                bg.postDelayed(() -> doPing(ctx), PING_INTERVAL_MS);
+                return;
+            }
             if (!pingRunning) return;
             state = State.ACTIVE;
             if (prefs(ctx).getBoolean(KEY_AUTO_RECOVERY, false)) {
@@ -186,35 +195,60 @@ public final class RouterManager {
         }, PING_INTERVAL_MS);
     }
 
-    private void execApply() {
-        try (TelnetRoot t = new TelnetRoot(CONNECT_MS, READ_MS)) {
-            t.exec(applyCmd());
-        } catch (Exception ignored) {}
+    // Returns true only when the command's verification clause confirms the
+    // intended end-state. Retries with backoff; catches Throwable. Runs on bg.
+    // cancelOnDisable: bail between attempts if the router was disabled
+    // (pingRunning cleared) — used by apply so a manual disable isn't blocked.
+    private boolean execVerified(String command, int attempts, long backoffMs, boolean cancelOnDisable) {
+        for (int i = 0; i < attempts; i++) {
+            if (cancelOnDisable && !pingRunning) return false;
+            try (TelnetRoot t = new TelnetRoot(CONNECT_MS, READ_MS)) {
+                if (t.exec(command).ok()) return true;
+            } catch (Throwable ignored) {}
+            if (i < attempts - 1) sleep(backoffMs);
+        }
+        return false;
     }
 
-    private void execPurge() {
-        for (int i = 0; i < 3; i++) {
-            try (TelnetRoot t = new TelnetRoot(CONNECT_MS, READ_MS)) {
-                t.exec(purgeCmd());
-                return;
-            } catch (Exception ignored) {}
+    private static void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+    }
+
+    private boolean execApply() {
+        return execVerified(applyCmd(), APPLY_ATTEMPTS, VERIFY_BACKOFF_MS, true);
+    }
+
+    private boolean execPurge() {
+        return execVerified(purgeCmd(), PURGE_ATTEMPTS, VERIFY_BACKOFF_MS, false);
     }
 
     private static String applyCmd() {
         return "echo 1 > /proc/sys/net/ipv4/ip_forward; "
-            + "ip rule del from all iif " + HOTSPOT_IF + " lookup " + STARLINK_TABLE + " priority " + RULE_PRIO + " 2>/dev/null; "
+            + "while ip rule | grep -q 'iif " + HOTSPOT_IF + " lookup " + STARLINK_TABLE + "'; do ip rule del from all iif " + HOTSPOT_IF + " lookup " + STARLINK_TABLE + " priority " + RULE_PRIO + " 2>/dev/null || break; done; "
             + "ip rule add from all iif " + HOTSPOT_IF + " lookup " + STARLINK_TABLE + " priority " + RULE_PRIO + "; "
             + "iptables -t nat -C POSTROUTING -o " + STARLINK_IF + " -j MASQUERADE 2>/dev/null || iptables -t nat -I POSTROUTING 1 -o " + STARLINK_IF + " -j MASQUERADE; "
             + "iptables -C FORWARD -i " + HOTSPOT_IF + " -o " + STARLINK_IF + " -j ACCEPT 2>/dev/null || iptables -I FORWARD 1 -i " + HOTSPOT_IF + " -o " + STARLINK_IF + " -j ACCEPT; "
-            + "iptables -C FORWARD -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || iptables -I FORWARD 1 -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT";
+            + "iptables -C FORWARD -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || iptables -I FORWARD 1 -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT; "
+            + "grep -qx 1 /proc/sys/net/ipv4/ip_forward 2>/dev/null "
+            + "&& ip rule | grep -q 'iif " + HOTSPOT_IF + " lookup " + STARLINK_TABLE + "' "
+            + "&& iptables -t nat -C POSTROUTING -o " + STARLINK_IF + " -j MASQUERADE 2>/dev/null "
+            + "&& iptables -C FORWARD -i " + HOTSPOT_IF + " -o " + STARLINK_IF + " -j ACCEPT 2>/dev/null "
+            + "&& iptables -C FORWARD -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null";
     }
 
     private static String purgeCmd() {
         return "while ip rule | grep -q 'iif " + HOTSPOT_IF + " lookup " + STARLINK_TABLE + "'; do ip rule del from all iif " + HOTSPOT_IF + " lookup " + STARLINK_TABLE + " priority " + RULE_PRIO + " 2>/dev/null || break; done; "
             + "while iptables -t nat -C POSTROUTING -o " + STARLINK_IF + " -j MASQUERADE 2>/dev/null; do iptables -t nat -D POSTROUTING -o " + STARLINK_IF + " -j MASQUERADE 2>/dev/null || break; done; "
             + "while iptables -C FORWARD -i " + HOTSPOT_IF + " -o " + STARLINK_IF + " -j ACCEPT 2>/dev/null; do iptables -D FORWARD -i " + HOTSPOT_IF + " -o " + STARLINK_IF + " -j ACCEPT 2>/dev/null || break; done; "
-            + "while iptables -C FORWARD -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null; do iptables -D FORWARD -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || break; done";
+            + "while iptables -C FORWARD -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null; do iptables -D FORWARD -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || break; done; "
+            + "! ip rule | grep -q 'iif " + HOTSPOT_IF + " lookup " + STARLINK_TABLE + "' "
+            + "&& ! iptables -t nat -C POSTROUTING -o " + STARLINK_IF + " -j MASQUERADE 2>/dev/null "
+            + "&& ! iptables -C FORWARD -i " + HOTSPOT_IF + " -o " + STARLINK_IF + " -j ACCEPT 2>/dev/null "
+            + "&& ! iptables -C FORWARD -i " + STARLINK_IF + " -o " + HOTSPOT_IF + " -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null";
     }
 
     private SharedPreferences prefs(Context ctx) {
